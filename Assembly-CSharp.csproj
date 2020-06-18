@@ -63,11 +63,18 @@
     </Reference>
   </ItemGroup>
   <ItemGroup>
+    <Compile Include="Assets\Scripts\CameraShaker.cs" />
     <Compile Include="Assets\Scripts\Minimap\MinimapElements.cs" />
     <Compile Include="Assets\Scripts\Minimap\MinimapSystem.cs" />
     <Compile Include="Assets\Scripts\Minimap\MinimapUI.cs" />
     <Compile Include="Assets\Scripts\PlayerControl.cs" />
     <Compile Include="Assets\Scripts\SimpleCameraController.cs" />
+    <Compile Include="Assets\Scripts\UI\FireButton.cs" />
+    <Compile Include="Assets\Scripts\UI\JumpButton.cs" />
+    <Compile Include="Assets\Scripts\UI\RunButton.cs" />
+    <Compile Include="Assets\Scripts\UI\VisualDirectionController.cs" />
+    <Compile Include="Assets\Scripts\UI\VisualViewController.cs" />
+    <Compile Include="Assets\Scripts\UI\WeaponAmmoInfo.cs" />
     <Compile Include="Assets\Scripts\Weapon.cs" />
     <Compile Include="Assets\TutorialInfo\Scripts\Readme.cs" />
     <None Include="Assets\Art\Shaders\MapShader.shader" />
@@ -119,6 +126,9 @@
     </Reference>
     <Reference Include="Unity.RenderPipelines.ShaderGraph.ShaderGraphLibrary">
       <HintPath>C:/unityPro/fps_demo/Library/ScriptAssemblies/Unity.RenderPipelines.ShaderGraph.ShaderGraphLibrary.dll</HintPath>
+    </Reference>
+    <Reference Include="Unity.2D.Sprite.Editor">
+      <HintPath>C:/unityPro/fps_demo/Library/ScriptAssemblies/Unity.2D.Sprite.Editor.dll</HintPath>
     </Reference>
     <Reference Include="Unity.Postprocessing.Runtime">
       <HintPath>C:/unityPro/fps_demo/Library/ScriptAssemblies/Unity.Postprocessing.Runtime.dll</HintPath>

@@ -4,13 +4,19 @@ using UnityEngine;
 
 public class Weapon : MonoBehaviour
 {
-    [Header("子弹设置")]
-    public int ammoAmount;                      //子弹总数
-    public int ammoLoadAmount;                  //每次重新装载子弹的数量
-    public float ammoInterval;                  //每两发子弹的时间间隔
-    private float ammoDeltatime;                //对子弹间隔时间计时的工具变量
+    public static Weapon instance { get; protected set; }
 
     private PlayerControl playerControl;
+    private WeaponAmmoInfo weaponAmmoInfo;
+
+    [Header("武器设置")]
+    public int ammoAmount;                      //子弹总数减去第一次装载子弹数量
+    public int ammoLoadAmount;                  //每次重新装载子弹的数量
+    private int ammoCurrentAmount;              //当前可用子弹数目
+    public float ammoInterval;                  //每两发子弹的时间间隔
+    private float ammoDeltatime;                //对子弹间隔时间计时的工具变量
+    public float reloadPauseTime;               //装载的时间
+    private float reloadPauseDeltaTime;         //对装载时间计时的工具变量
 
     private Animator weaponAnimator;
 
@@ -35,18 +41,31 @@ public class Weapon : MonoBehaviour
 
     private AudioSource audioSource;
 
+    private void Awake()
+    {
+        instance = this;
+    }
+
     void Start()
     {
         weaponAnimator = GetComponent<Animator>();
         playerControl = PlayerControl._instance;
+        weaponAmmoInfo = WeaponAmmoInfo.instance;
         audioSource = GetComponent<AudioSource>();
 
         ammoDeltatime = ammoInterval;
+        reloadPauseDeltaTime = -0.1f;
+
+        //UI显示
+        weaponAmmoInfo.UpdateCurrentAmmoAmount(ammoLoadAmount);
+        ammoCurrentAmount = ammoLoadAmount;
+        weaponAmmoInfo.UpdateRemainAmmoAmount(ammoAmount);
     }
     
     void Update()
     {
-        TestWeaponState();
+        ammoDeltatime -= Time.deltaTime;
+        reloadPauseDeltaTime -= Time.deltaTime;
 
         Vector3[] trailPos = new Vector3[2];
         for(int i = 0; i < m_ActiveTrails.Count; ++i)
@@ -56,8 +75,8 @@ public class Weapon : MonoBehaviour
             curTrail.renderer.GetPositions(trailPos);
             curTrail.remainingTime -= Time.deltaTime;
 
-            trailPos[0] += curTrail.direction * Time.deltaTime * 50f;
-            trailPos[1] += curTrail.direction * Time.deltaTime * 50f;
+            trailPos[0] += curTrail.direction * Time.deltaTime * 150f;
+            trailPos[1] += curTrail.direction * Time.deltaTime * 150f;
 
             curTrail.renderer.SetPositions(trailPos);
 
@@ -70,19 +89,50 @@ public class Weapon : MonoBehaviour
         }
     }
 
-    private void TestWeaponState()
+    public void Fire()
     {
-        ammoDeltatime -= Time.deltaTime;
+        if (ammoCurrentAmount == 0 && ammoAmount == 0)
+        {
+            return;
+        }
 
         weaponAnimator.SetBool("isRunning", playerControl.isRunning);
-        if (Input.GetMouseButtonDown(0) && ammoDeltatime < 0)
+        if (ammoDeltatime < 0 && reloadPauseDeltaTime < 0)
         {
             weaponAnimator.SetTrigger("fire");
             audioSource.PlayOneShot(fireAudio);
+
+            //镜头抖动
+            CameraShaker.instance.ShakeCamera(0.5f);
+
+            //更换子弹UI
             ammoDeltatime = ammoInterval;
+            ammoCurrentAmount--;
+            weaponAmmoInfo.UpdateCurrentAmmoAmount(ammoCurrentAmount);
 
             AmmoShotRayCast();
         }
+
+        if (ammoCurrentAmount == 0 && ammoAmount > 0)
+        {
+            Reload();
+            reloadPauseDeltaTime = reloadPauseTime;
+        }
+    }
+
+    public void Reload()
+    {
+        if (ammoCurrentAmount == ammoLoadAmount)
+            return;
+        int addAmmoAmount = Mathf.Min(ammoAmount, ammoLoadAmount - ammoCurrentAmount);
+        ammoAmount -= addAmmoAmount;
+        ammoCurrentAmount += addAmmoAmount;
+        weaponAmmoInfo.UpdateCurrentAmmoAmount(ammoCurrentAmount);
+        weaponAmmoInfo.UpdateRemainAmmoAmount(ammoAmount);
+
+        weaponAnimator.SetTrigger("reload");
+        audioSource.PlayOneShot(reloadAudio);
+ 
     }
 
     private void AmmoShotRayCast()
@@ -116,7 +166,7 @@ public class Weapon : MonoBehaviour
 
         // 通过LineRenderer 显示子弹轨迹
         Vector3[] trailPos = new Vector3[] { ammoShotTransform.position,
-            ammoShotTransform.position + (hitPosition - ammoShotTransform.position).normalized * 10f };
+            ammoShotTransform.position + (hitPosition - ammoShotTransform.position).normalized * 5f };
         LineRenderer trail = Instantiate(ammoRayTrailPrefab);
         trail.SetPositions(trailPos);
         m_ActiveTrails.Add(new ActiveTrail()

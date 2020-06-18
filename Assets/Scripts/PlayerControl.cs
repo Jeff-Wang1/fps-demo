@@ -9,7 +9,7 @@ public class PlayerControl : MonoBehaviour
     public float moveSpeed = 1.5f;
     public float changeViewSpeed = 3.0f;
     private float maxViewAngle = 60.0f;
-    private float gravity = 50.0f;
+    public float gravity = 50.0f;
     public float upHeight = 1.0f;
     private Vector3 xyzMove = Vector3.zero;
 
@@ -31,24 +31,26 @@ public class PlayerControl : MonoBehaviour
 
     private void Start()
     {
-        Cursor.lockState = CursorLockMode.Locked;
+        //Cursor.lockState = CursorLockMode.Locked;
     }
 
     private void FixedUpdate()
     {
-        DoMoveAndJump();
-        DoChangeView();
+        Debug.DrawRay(Model.transform.position, Vector3.down * 1.5f, Color.red);
+        if (xyzMove.y > 0)
+        {
+            xyzMove.y -= gravity * Time.deltaTime;
+            
+        }
+        controller.Move(controller.transform.TransformDirection(xyzMove * Time.deltaTime));
     }
 
-    private void DoMoveAndJump()
+    public void DoMove(float xMove,float zMove)
     {
         if (IsOnGround())
         {
-            float xMove = Input.GetAxisRaw("Horizontal");
-            float zMove = Input.GetAxisRaw("Vertical");
-
-            isRunning = Input.GetKey(KeyCode.LeftShift);
-            // 左Shift加速
+ 
+            // 加速
             if (isRunning)
             {
                 xyzMove = new Vector3(xMove, 0, zMove) * moveSpeed * 2;
@@ -56,58 +58,35 @@ public class PlayerControl : MonoBehaviour
             else
             {
                 xyzMove = new Vector3(xMove, 0, zMove) * moveSpeed;   
-            }
+            }         
 
-            // Run_Forward,Forward,Backward,Run_Backward在Animator对应的condition分别为3、2、1、-1
-            if(xMove == 0 && zMove == 0)
-            {
-                //animator.SetInteger("condition", 0);
-            }
-            else if(zMove < 0)
-            {
-                if (isRunning)
-                {
-                    //animator.SetInteger("condition", -1);
-                }
-                else
-                {
-                    //animator.SetInteger("condition", 1);
-                }
-            }
-            else
-            {
-                if (isRunning)
-                {
-                    //animator.SetInteger("condition", 3);
-                }
-                else
-                {
-                    //animator.SetInteger("condition", 2);
-                }
-            }
-
-            if (Input.GetKeyDown(KeyCode.Space))
-            {
-                xyzMove.y = upHeight;
-            }
         }
 
-        xyzMove.y -= gravity * Time.deltaTime;
-
         controller.Move(controller.transform.TransformDirection(xyzMove * Time.deltaTime));
+
+        xyzMove.x = 0f;
+        xyzMove.z = 0f;
+    }
+
+    public void DoJump()
+    {
+        if (IsOnGround())
+        {
+            xyzMove.y = upHeight;
+        }
     }
 
     private bool IsOnGround()
     {
         int layerMask = 1 << 9;
-        //Debug.DrawRay(Model.transform.position, Vector3.down * 1.2f);
-        return Physics.Raycast(Model.transform.position, Vector3.down, 1.2f, layerMask);
+        
+        return Physics.Raycast(Model.transform.position, Vector3.down, 1.5f, layerMask);
     }
 
-    private void DoChangeView()
+    public void DoChangeView(float xRotation,float yRotation)
     {
-        xRotate += Input.GetAxis("Mouse X");
-        yRotate -= Input.GetAxis("Mouse Y");
+        xRotate += xRotation;
+        yRotate -= yRotation;
 
         Model.transform.eulerAngles = new Vector3(0, xRotate * changeViewSpeed, 0);
 
