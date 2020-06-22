@@ -7,11 +7,11 @@ using UnityEngine.EventSystems;
 public class VisualViewController : MonoBehaviour, IDragHandler,IPointerDownHandler
 {
     private Vector2 initialTouchPosition;               //刚开始触摸的屏幕坐标
-    public float smoothness = 0.05f;
-
+    public float smoothness = 0.05f;                    //拖拉视角灵敏度
 
     void IDragHandler.OnDrag(PointerEventData eventData)
     {
+
         Vector2 touchPositionDifference = eventData.position - initialTouchPosition;
 
         //改变视角方向

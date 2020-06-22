@@ -22,7 +22,7 @@ public class PlayerControl : MonoBehaviour
 
     public Camera playerCamera;
 
-    float xRotate = 0, yRotate = 0;
+    private float xRotate = -90f, yRotate = 0f;
 
     private void Awake()
     {
@@ -36,7 +36,7 @@ public class PlayerControl : MonoBehaviour
 
     private void FixedUpdate()
     {
-        Debug.DrawRay(Model.transform.position, Vector3.down * 1.5f, Color.red);
+        //Debug.DrawRay(Model.transform.position, Vector3.down * 1.5f, Color.red);
         if (xyzMove.y > 0)
         {
             xyzMove.y -= gravity * Time.deltaTime;

@@ -44,6 +44,14 @@ public class Weapon : MonoBehaviour
     private void Awake()
     {
         instance = this;
+        if (ammoRayTrailPrefab != null)
+        {
+            ObjectPool.instance.InitObjectPool(ammoRayTrailPrefab, 10);
+        }
+        if (ammoShotParticlePrefab != null)
+        {
+            ObjectPool.instance.InitObjectPool(ammoShotParticlePrefab, 10);
+        }
     }
 
     void Start()
@@ -64,8 +72,14 @@ public class Weapon : MonoBehaviour
     
     void Update()
     {
-        ammoDeltatime -= Time.deltaTime;
-        reloadPauseDeltaTime -= Time.deltaTime;
+        if (ammoDeltatime > 0.0f)
+        {
+            ammoDeltatime -= Time.deltaTime;
+        }
+        if (reloadPauseDeltaTime > 0.0f)
+        {
+            reloadPauseDeltaTime -= Time.deltaTime;
+        }
 
         Vector3[] trailPos = new Vector3[2];
         for(int i = 0; i < m_ActiveTrails.Count; ++i)
@@ -83,7 +97,8 @@ public class Weapon : MonoBehaviour
             if (curTrail.remainingTime < 0)
             {
                 m_ActiveTrails.RemoveAt(i);
-                Destroy(curTrail.renderer.gameObject);
+                //Destroy(curTrail.renderer.gameObject);
+                curTrail.renderer.gameObject.SetActive(false);
                 i--;
             }
         }
@@ -116,7 +131,6 @@ public class Weapon : MonoBehaviour
         if (ammoCurrentAmount == 0 && ammoAmount > 0)
         {
             Reload();
-            reloadPauseDeltaTime = reloadPauseTime;
         }
     }
 
@@ -132,7 +146,8 @@ public class Weapon : MonoBehaviour
 
         weaponAnimator.SetTrigger("reload");
         audioSource.PlayOneShot(reloadAudio);
- 
+
+        reloadPauseDeltaTime = reloadPauseTime;
     }
 
     private void AmmoShotRayCast()
@@ -152,9 +167,12 @@ public class Weapon : MonoBehaviour
             // 子弹击中的粒子特效
             if(raycastHit.distance < 200f)
             {
-                Instantiate(ammoShotParticlePrefab, raycastHit.point, Quaternion.identity);
-                //TODO: 需要用 objectpool 存取子弹轨迹和击中的粒子系统
-                // ！！！
+                //Instantiate(ammoShotParticlePrefab, raycastHit.point, Quaternion.identity);
+                //改用ObjectPool
+                var o = ObjectPool.instance.GetInstance<ParticleSystem>(ammoShotParticlePrefab);
+                o.transform.position = raycastHit.point;
+                StartCoroutine(particleExist(o));
+                //o.gameObject.SetActive(false);
             }
 
             //TODO：子弹打到怪物
@@ -167,7 +185,8 @@ public class Weapon : MonoBehaviour
         // 通过LineRenderer 显示子弹轨迹
         Vector3[] trailPos = new Vector3[] { ammoShotTransform.position,
             ammoShotTransform.position + (hitPosition - ammoShotTransform.position).normalized * 5f };
-        LineRenderer trail = Instantiate(ammoRayTrailPrefab);
+        //LineRenderer trail = Instantiate(ammoRayTrailPrefab);
+        LineRenderer trail = ObjectPool.instance.GetInstance<LineRenderer>(ammoRayTrailPrefab);
         trail.SetPositions(trailPos);
         m_ActiveTrails.Add(new ActiveTrail()
         {
@@ -177,4 +196,10 @@ public class Weapon : MonoBehaviour
         });
     }
     
+    //一秒后子弹特效消失
+    IEnumerator particleExist(ParticleSystem prefab)
+    {
+        yield return new WaitForSeconds(1);
+        prefab.gameObject.SetActive(false);
+    }
 }

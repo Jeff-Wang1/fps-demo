@@ -67,10 +67,12 @@
     <Compile Include="Assets\Scripts\Minimap\MinimapElements.cs" />
     <Compile Include="Assets\Scripts\Minimap\MinimapSystem.cs" />
     <Compile Include="Assets\Scripts\Minimap\MinimapUI.cs" />
+    <Compile Include="Assets\Scripts\ObjectPool.cs" />
     <Compile Include="Assets\Scripts\PlayerControl.cs" />
     <Compile Include="Assets\Scripts\SimpleCameraController.cs" />
     <Compile Include="Assets\Scripts\UI\FireButton.cs" />
     <Compile Include="Assets\Scripts\UI\JumpButton.cs" />
+    <Compile Include="Assets\Scripts\UI\ReloadButton.cs" />
     <Compile Include="Assets\Scripts\UI\RunButton.cs" />
     <Compile Include="Assets\Scripts\UI\VisualDirectionController.cs" />
     <Compile Include="Assets\Scripts\UI\VisualViewController.cs" />
