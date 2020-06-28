@@ -1,3 +1,3 @@
-Updating
+更新中
 
-Progress rate is stored in the folder "Gif_Examples" as gif files.
+视频演示链接：https://www.bilibili.com/video/BV19K411n72F
